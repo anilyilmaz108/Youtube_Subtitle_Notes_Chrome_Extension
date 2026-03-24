@@ -2,6 +2,7 @@ const statusText = document.getElementById("statusText");
 const debugText = document.getElementById("debugText");
 const saveCurrentBtn = document.getElementById("saveCurrentBtn");
 const downloadLatestBtn = document.getElementById("downloadLatestBtn");
+const downloadLatestPdfBtn = document.getElementById("downloadLatestPdfBtn");
 const clearAllBtn = document.getElementById("clearAllBtn");
 const notesList = document.getElementById("notesList");
 const noteItemTemplate = document.getElementById("noteItemTemplate");
@@ -14,6 +15,7 @@ const pulseDot = document.getElementById("pulseDot");
 document.addEventListener("DOMContentLoaded", init);
 saveCurrentBtn.addEventListener("click", handleSaveCurrentVideo);
 downloadLatestBtn.addEventListener("click", handleDownloadLatest);
+downloadLatestPdfBtn.addEventListener("click", handleDownloadLatestPdf);
 clearAllBtn.addEventListener("click", handleClearAll);
 
 async function init() {
@@ -79,6 +81,20 @@ async function handleDownloadLatest() {
   const noteToDownload = await ensureTranslatedNote(latestNote);
   await downloadNote(noteToDownload);
   setStatus(`İndirildi: ${latestNote.title}`);
+}
+
+async function handleDownloadLatestPdf() {
+  const { subtitleNotes = [] } = await chrome.storage.local.get("subtitleNotes");
+  const latestNote = subtitleNotes[0];
+
+  if (!latestNote) {
+    setStatus("PDF icin kayit bulunamadı.");
+    return;
+  }
+
+  const noteToDownload = await ensureTranslatedNote(latestNote);
+  await openPdfReport(noteToDownload);
+  setStatus(`PDF acildi: ${latestNote.title}`);
 }
 
 async function handleClearAll() {
@@ -153,6 +169,7 @@ async function renderNotes() {
   noteCountValue.textContent = String(subtitleNotes.length);
 
   downloadLatestBtn.disabled = subtitleNotes.length === 0;
+  downloadLatestPdfBtn.disabled = subtitleNotes.length === 0;
   clearAllBtn.disabled = subtitleNotes.length === 0;
 
   if (subtitleNotes.length === 0) {
@@ -169,7 +186,8 @@ async function renderNotes() {
     const title = fragment.querySelector(".note-title");
     const meta = fragment.querySelector(".note-meta");
     const preview = fragment.querySelector(".note-preview");
-    const downloadBtn = fragment.querySelector(".download-note-btn");
+    const txtBtn = fragment.querySelector(".txt-note-btn");
+    const pdfBtn = fragment.querySelector(".pdf-note-btn");
     const languageTag = fragment.querySelector(".note-lang");
     const kindTag = fragment.querySelector(".note-kind");
 
@@ -179,10 +197,15 @@ async function renderNotes() {
     kindTag.textContent =
       note.originalText && note.originalText !== note.text ? "Ceviri + Orijinal" : "Tek Metin";
     preview.textContent = note.text.slice(0, 220);
-    downloadBtn.addEventListener("click", async () => {
+    txtBtn.addEventListener("click", async () => {
       const noteToDownload = await ensureTranslatedNote(note);
       await downloadNote(noteToDownload);
       setStatus(`İndirildi: ${note.title}`);
+    });
+    pdfBtn.addEventListener("click", async () => {
+      const noteToDownload = await ensureTranslatedNote(note);
+      await openPdfReport(noteToDownload);
+      setStatus(`PDF acildi: ${note.title}`);
     });
 
     noteItem.dataset.noteId = note.id;
@@ -344,7 +367,21 @@ function setStatus(message) {
 function toggleButtons(isBusy) {
   saveCurrentBtn.disabled = isBusy;
   downloadLatestBtn.disabled = isBusy;
+  downloadLatestPdfBtn.disabled = isBusy;
   clearAllBtn.disabled = isBusy;
+}
+
+async function openPdfReport(note) {
+  const reportKey = `report-${note.id}`;
+  await chrome.storage.local.set({
+    [reportKey]: {
+      note,
+      createdAt: new Date().toISOString()
+    }
+  });
+
+  const url = chrome.runtime.getURL(`report.html?reportKey=${encodeURIComponent(reportKey)}&autoprint=1`);
+  await chrome.tabs.create({ url });
 }
 
 async function refreshCaptureUi() {

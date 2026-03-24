@@ -1,0 +1,147 @@
+:root {
+  --ink: #241813;
+  --muted: #776659;
+  --accent: #b84b21;
+  --line: rgba(74, 47, 30, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  background: linear-gradient(180deg, #f7f0e6 0%, #efe1cf 100%);
+}
+
+.report-root {
+  padding: 32px 18px;
+}
+
+.report-shell {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 42px;
+  border-radius: 28px;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, #fffefb 0%, #fbf4ea 100%);
+  box-shadow: 0 24px 54px rgba(89, 53, 29, 0.14);
+}
+
+.report-hero {
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.report-eyebrow {
+  margin: 0 0 10px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.report-title {
+  margin: 0;
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.report-summary {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.report-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.meta-card {
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.meta-label {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.meta-value {
+  display: block;
+  margin-top: 10px;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.report-section {
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+}
+
+.section-head {
+  margin-bottom: 14px;
+}
+
+.section-kicker {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 26px;
+  line-height: 1.1;
+}
+
+.report-text {
+  margin: 0;
+  padding: 22px;
+  border-radius: 18px;
+  border: 1px solid rgba(74, 47, 30, 0.08);
+  background: linear-gradient(180deg, #fffefc 0%, #faf4ea 100%);
+  color: #30211a;
+  font-family: "SF Mono", "Menlo", monospace;
+  font-size: 13px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+@media print {
+  body {
+    background: #fff;
+  }
+
+  .report-root {
+    padding: 0;
+  }
+
+  .report-shell {
+    max-width: none;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: #fff;
+  }
+}

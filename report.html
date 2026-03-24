@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Subtitle Note Report</title>
+    <link rel="stylesheet" href="report.css" />
+  </head>
+  <body>
+    <main class="report-root">
+      <section class="report-shell">
+        <header class="report-hero">
+          <p class="report-eyebrow">YouTube Subtitle Notes</p>
+          <h1 id="reportTitle" class="report-title">Rapor Hazirlaniyor</h1>
+          <p id="reportSummary" class="report-summary">Metin yukleniyor.</p>
+        </header>
+
+        <section class="report-meta-grid">
+          <article class="meta-card">
+            <span class="meta-label">Video</span>
+            <strong id="metaVideo" class="meta-value">-</strong>
+          </article>
+          <article class="meta-card">
+            <span class="meta-label">Dil</span>
+            <strong id="metaLanguage" class="meta-value">-</strong>
+          </article>
+          <article class="meta-card">
+            <span class="meta-label">Kayit Tarihi</span>
+            <strong id="metaSavedAt" class="meta-value">-</strong>
+          </article>
+        </section>
+
+        <section class="report-section">
+          <div class="section-head">
+            <p class="section-kicker">Turkce</p>
+            <h2 class="section-title">Ceviri Metni</h2>
+          </div>
+          <pre id="translationText" class="report-text"></pre>
+        </section>
+
+        <section class="report-section">
+          <div class="section-head">
+            <p class="section-kicker">Orijinal</p>
+            <h2 class="section-title">Kaynak Metin</h2>
+          </div>
+          <pre id="originalText" class="report-text"></pre>
+        </section>
+      </section>
+    </main>
+
+    <script src="report.js"></script>
+  </body>
+</html>

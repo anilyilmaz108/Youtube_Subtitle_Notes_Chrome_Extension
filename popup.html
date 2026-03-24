@@ -35,10 +35,11 @@
       </div>
     </section>
 
-      <section class="actions">
-        <button id="saveCurrentBtn" class="primary-btn">Yakalamayi Baslat</button>
-        <button id="downloadLatestBtn" class="secondary-btn">Son Notu İndir</button>
-      </section>
+    <section class="actions">
+      <button id="saveCurrentBtn" class="primary-btn">Yakalamayi Baslat</button>
+      <button id="downloadLatestBtn" class="secondary-btn">Son Notu TXT</button>
+      <button id="downloadLatestPdfBtn" class="secondary-btn">Son Notu PDF</button>
+    </section>
 
     <section class="status-card">
       <div class="status-header">
@@ -66,13 +67,16 @@
 
   <template id="noteItemTemplate">
     <article class="note-item">
-        <div class="note-item-header">
-          <div>
-            <h3 class="note-title"></h3>
-            <p class="note-meta"></p>
-          </div>
-          <button class="download-note-btn">İndir</button>
+      <div class="note-item-header">
+        <div>
+          <h3 class="note-title"></h3>
+          <p class="note-meta"></p>
         </div>
+        <div class="note-actions">
+          <button class="download-note-btn txt-note-btn">TXT</button>
+          <button class="download-note-btn pdf-note-btn">PDF</button>
+        </div>
+      </div>
       <div class="note-tags">
         <span class="note-tag note-lang"></span>
         <span class="note-tag note-kind"></span>
