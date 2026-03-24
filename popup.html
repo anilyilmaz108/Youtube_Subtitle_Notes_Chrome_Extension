@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube Subtitle Notes</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+
+<body>
+  <main class="app">
+    <section class="hero">
+      <div class="hero-top">
+        <p class="eyebrow">YouTube Subtitle Notes</p>
+        <span id="captureBadge" class="capture-badge">Hazır</span>
+      </div>
+      <h1>Subtitle Notes Studio</h1>
+      <p class="subtext">
+        Canlı altyazıyı topla, İngilizceyse Türkçeye çevir ve düzenli bir rapor olarak dışa aktar.
+      </p>
+      <div class="hero-stats">
+        <article class="stat-chip">
+          <span class="stat-label">Mod</span>
+          <strong id="modeValue" class="stat-value">Canlı Yakalama</strong>
+        </article>
+        <article class="stat-chip">
+          <span class="stat-label">Notlar</span>
+          <strong id="noteCountValue" class="stat-value">0</strong>
+        </article>
+        <article class="stat-chip">
+          <span class="stat-label">Durum</span>
+          <strong id="captureCountValue" class="stat-value">Beklemede</strong>
+        </article>
+      </div>
+    </section>
+
+      <section class="actions">
+        <button id="saveCurrentBtn" class="primary-btn">Yakalamayi Baslat</button>
+        <button id="downloadLatestBtn" class="secondary-btn">Son Notu İndir</button>
+      </section>
+
+    <section class="status-card">
+      <div class="status-header">
+        <div>
+          <p class="status-label">Durum</p>
+          <p id="statusText" class="status-text">Hazır</p>
+        </div>
+        <div class="pulse-wrap">
+          <span id="pulseDot" class="pulse-dot"></span>
+        </div>
+      </div>
+      <pre id="debugText" class="debug-text" hidden></pre>
+    </section>
+
+    <section class="notes-card">
+      <div class="notes-header">
+        <h2>Kayıtlı Notlar</h2>
+        <button id="clearAllBtn" class="ghost-btn">Arsivi Temizle</button>
+      </div>
+      <div id="notesList" class="notes-list">
+        <p class="empty-state">Henüz kayıt yok.</p>
+      </div>
+    </section>
+  </main>
+
+  <template id="noteItemTemplate">
+    <article class="note-item">
+        <div class="note-item-header">
+          <div>
+            <h3 class="note-title"></h3>
+            <p class="note-meta"></p>
+          </div>
+          <button class="download-note-btn">İndir</button>
+        </div>
+      <div class="note-tags">
+        <span class="note-tag note-lang"></span>
+        <span class="note-tag note-kind"></span>
+      </div>
+      <p class="note-preview"></p>
+    </article>
+  </template>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,340 @@
+:root {
+  --bg: #f7efdf;
+  --surface: rgba(255, 250, 242, 0.84);
+  --surface-strong: rgba(255, 253, 249, 0.94);
+  --text: #231711;
+  --muted: #78655a;
+  --accent: #b84b21;
+  --accent-dark: #7f2f11;
+  --accent-soft: #f1d3be;
+  --success: #1f7a56;
+  --success-soft: #d8f0e5;
+  --border: rgba(87, 52, 30, 0.1);
+  --shadow: 0 24px 50px rgba(93, 54, 25, 0.16);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 400px;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(255, 196, 137, 0.42), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(214, 101, 45, 0.22), transparent 34%),
+    linear-gradient(145deg, #fbf6ee 0%, #f1e0c6 56%, #e8d1b0 100%);
+}
+
+.app {
+  padding: 18px;
+}
+
+.hero,
+.status-card,
+.notes-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 20px;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: auto -30px -36px auto;
+  width: 140px;
+  height: 140px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(184, 75, 33, 0.18) 0%, transparent 72%);
+}
+
+.hero-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.capture-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  color: var(--accent-dark);
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(184, 75, 33, 0.14);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.hero h1 {
+  margin: 2px 0 0;
+  max-width: 260px;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.subtext {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.stat-chip {
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.56);
+  border: 1px solid rgba(87, 52, 30, 0.08);
+}
+
+.stat-label {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  display: block;
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+button {
+  border: 0;
+  border-radius: 16px;
+  padding: 13px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+button:hover {
+  transform: translateY(-1px) scale(1.01);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  transform: none;
+}
+
+.primary-btn {
+  color: #fff8f2;
+  background: linear-gradient(135deg, var(--accent) 0%, #d86934 100%);
+  box-shadow: 0 16px 28px rgba(184, 75, 33, 0.22);
+}
+
+.secondary-btn,
+.download-note-btn {
+  color: var(--accent-dark);
+  background: linear-gradient(135deg, #faeadc 0%, #f1d7c0 100%);
+}
+
+.ghost-btn {
+  padding: 8px 10px;
+  color: var(--muted);
+  background: transparent;
+}
+
+.status-card,
+.notes-card {
+  padding: 18px;
+}
+
+.status-card {
+  margin-bottom: 16px;
+}
+
+.status-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.status-label {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.status-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.45;
+  max-width: 250px;
+}
+
+.pulse-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.64);
+}
+
+.pulse-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 0 0 rgba(184, 75, 33, 0.45);
+  animation: pulse 1.8s infinite;
+}
+
+.debug-text {
+  margin: 14px 0 0;
+  padding: 12px;
+  overflow: auto;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #f7ede1 0%, #f2e2d1 100%);
+  color: #5f4738;
+  font-size: 12px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.notes-header h2 {
+  margin: 0;
+  font-size: 19px;
+}
+
+.notes-list {
+  display: grid;
+  gap: 12px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.note-item {
+  padding: 15px;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 249, 241, 0.92) 100%);
+  border: 1px solid rgba(73, 53, 39, 0.07);
+}
+
+.note-item-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.note-title {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.note-meta,
+.note-preview,
+.empty-state {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.note-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.note-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  background: #f8ecdf;
+  color: #85563f;
+}
+
+.note-preview {
+  margin-top: 12px;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+}
+
+.empty-state {
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.48);
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(184, 75, 33, 0.38);
+  }
+
+  70% {
+    box-shadow: 0 0 0 10px rgba(184, 75, 33, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(184, 75, 33, 0);
+  }
+}
