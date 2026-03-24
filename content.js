@@ -1,4 +1,14 @@
 const CAPTURE_STORAGE_KEY = "subtitleCaptureState";
+const WORD_TRANSLATION_CACHE = new Map();
+
+const hoverState = {
+  overlay: null,
+  tooltip: null,
+  syncIntervalId: null,
+  lastSignature: "",
+  resumeOnLeave: false,
+  tooltipHideTimer: null
+};
 
 const captureState = {
   active: false,
@@ -33,6 +43,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   return false;
 });
+
+initInteractiveSubtitleOverlay();
 
 async function getCaptureState() {
   if (captureState.active) {
@@ -209,6 +221,333 @@ function readVisibleCaptionText() {
   }
 
   return "";
+}
+
+function initInteractiveSubtitleOverlay() {
+  injectInteractiveSubtitleStyles();
+  createInteractiveSubtitleOverlay();
+
+  hoverState.syncIntervalId = window.setInterval(() => {
+    syncInteractiveSubtitleOverlay();
+  }, 250);
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      hideWordTooltip();
+      hideOverlay();
+    }
+  });
+}
+
+function injectInteractiveSubtitleStyles() {
+  if (document.getElementById("yt-subtitle-hover-styles")) {
+    return;
+  }
+
+  const style = document.createElement("style");
+  style.id = "yt-subtitle-hover-styles";
+  style.textContent = `
+    .yt-subtitle-hover-overlay {
+      position: fixed;
+      z-index: 2147483646;
+      pointer-events: none;
+      display: none;
+      padding: 6px 10px;
+      border-radius: 14px;
+      background: rgba(16, 10, 7, 0.18);
+      backdrop-filter: blur(4px);
+    }
+
+    .yt-subtitle-hover-line {
+      text-align: center;
+      line-height: 1.45;
+      color: #ffffff;
+      font-weight: 700;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+      font-size: 20px;
+    }
+
+    .yt-subtitle-hover-word {
+      pointer-events: auto;
+      cursor: help;
+      border-radius: 8px;
+      transition: background-color 0.14s ease, color 0.14s ease;
+    }
+
+    .yt-subtitle-hover-word:hover {
+      background: rgba(255, 232, 214, 0.94);
+      color: #231711;
+      text-shadow: none;
+    }
+
+    .yt-subtitle-translate-tooltip {
+      position: fixed;
+      z-index: 2147483647;
+      display: none;
+      max-width: 240px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255, 248, 240, 0.98);
+      color: #2c1d16;
+      border: 1px solid rgba(118, 78, 52, 0.14);
+      box-shadow: 0 18px 40px rgba(24, 12, 8, 0.22);
+      font-size: 13px;
+      line-height: 1.45;
+      white-space: normal;
+      pointer-events: none;
+    }
+
+    .yt-subtitle-translate-tooltip strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #9d431e;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+  `;
+
+  document.documentElement.appendChild(style);
+}
+
+function createInteractiveSubtitleOverlay() {
+  if (hoverState.overlay && hoverState.tooltip) {
+    return;
+  }
+
+  const overlay = document.createElement("div");
+  overlay.className = "yt-subtitle-hover-overlay";
+
+  const tooltip = document.createElement("div");
+  tooltip.className = "yt-subtitle-translate-tooltip";
+
+  document.body.appendChild(overlay);
+  document.body.appendChild(tooltip);
+
+  hoverState.overlay = overlay;
+  hoverState.tooltip = tooltip;
+}
+
+function syncInteractiveSubtitleOverlay() {
+  const captionData = getVisibleCaptionData();
+
+  if (!captionData) {
+    hideOverlay();
+    return;
+  }
+
+  const signature = JSON.stringify(captionData.lines);
+
+  if (hoverState.lastSignature !== signature) {
+    hoverState.lastSignature = signature;
+    renderOverlayWords(captionData.lines);
+  }
+
+  positionOverlay(captionData.rect);
+}
+
+function getVisibleCaptionData() {
+  const windowContainer = document.querySelector(".ytp-caption-window-container");
+  const lineNodes = Array.from(
+    document.querySelectorAll(".ytp-caption-window-container .caption-visual-line")
+  ).filter((node) => normalizeCaptionText(node.textContent || ""));
+
+  if (!windowContainer || !lineNodes.length) {
+    return null;
+  }
+
+  const rect = mergeRects(lineNodes.map((node) => node.getBoundingClientRect()));
+
+  if (!rect || rect.width < 10 || rect.height < 10) {
+    return null;
+  }
+
+  return {
+    rect,
+    lines: lineNodes.map((node) => normalizeCaptionText(node.textContent || "")).filter(Boolean)
+  };
+}
+
+function mergeRects(rects) {
+  const validRects = rects.filter((rect) => rect && rect.width > 0 && rect.height > 0);
+
+  if (!validRects.length) {
+    return null;
+  }
+
+  const left = Math.min(...validRects.map((rect) => rect.left));
+  const top = Math.min(...validRects.map((rect) => rect.top));
+  const right = Math.max(...validRects.map((rect) => rect.right));
+  const bottom = Math.max(...validRects.map((rect) => rect.bottom));
+
+  return {
+    left,
+    top,
+    width: right - left,
+    height: bottom - top
+  };
+}
+
+function renderOverlayWords(lines) {
+  if (!hoverState.overlay) {
+    return;
+  }
+
+  hoverState.overlay.innerHTML = "";
+
+  lines.forEach((line) => {
+    const lineElement = document.createElement("div");
+    lineElement.className = "yt-subtitle-hover-line";
+
+    tokenizeLine(line).forEach((token) => {
+      if (token.type === "space") {
+        lineElement.appendChild(document.createTextNode(token.value));
+        return;
+      }
+
+      const word = document.createElement("span");
+      word.className = "yt-subtitle-hover-word";
+      word.textContent = token.value;
+      word.dataset.word = token.value;
+      word.addEventListener("mouseenter", handleWordHoverStart);
+      word.addEventListener("mouseleave", handleWordHoverEnd);
+      lineElement.appendChild(word);
+    });
+
+    hoverState.overlay.appendChild(lineElement);
+  });
+}
+
+function tokenizeLine(line) {
+  return line.split(/(\s+)/).filter(Boolean).map((part) => ({
+    type: /\s+/.test(part) ? "space" : "word",
+    value: part
+  }));
+}
+
+function positionOverlay(rect) {
+  if (!hoverState.overlay) {
+    return;
+  }
+
+  hoverState.overlay.style.display = "block";
+  hoverState.overlay.style.left = `${Math.max(0, rect.left - 10)}px`;
+  hoverState.overlay.style.top = `${Math.max(0, rect.top - 6)}px`;
+  hoverState.overlay.style.width = `${rect.width + 20}px`;
+  hoverState.overlay.style.minHeight = `${rect.height + 12}px`;
+}
+
+function hideOverlay() {
+  if (hoverState.overlay) {
+    hoverState.overlay.style.display = "none";
+  }
+
+  hoverState.lastSignature = "";
+  hideWordTooltip();
+}
+
+async function handleWordHoverStart(event) {
+  const word = (event.currentTarget?.dataset.word || "").trim();
+
+  if (!word) {
+    return;
+  }
+
+  clearTimeout(hoverState.tooltipHideTimer);
+
+  const video = document.querySelector("video");
+  hoverState.resumeOnLeave = Boolean(video && !video.paused);
+
+  if (hoverState.resumeOnLeave) {
+    video.pause();
+  }
+
+  showWordTooltip(event.currentTarget, "Yukleniyor...");
+
+  try {
+    const translated = await translateHoveredWord(word);
+    showWordTooltip(event.currentTarget, translated || "Ceviri bulunamadi.");
+  } catch {
+    showWordTooltip(event.currentTarget, "Ceviri alinamadi.");
+  }
+}
+
+function handleWordHoverEnd() {
+  hoverState.tooltipHideTimer = window.setTimeout(() => {
+    hideWordTooltip();
+    const video = document.querySelector("video");
+
+    if (hoverState.resumeOnLeave && video?.paused) {
+      video.play().catch(() => {});
+    }
+
+    hoverState.resumeOnLeave = false;
+  }, 80);
+}
+
+function showWordTooltip(target, meaning) {
+  if (!hoverState.tooltip) {
+    return;
+  }
+
+  const rect = target.getBoundingClientRect();
+  hoverState.tooltip.replaceChildren();
+  const label = document.createElement("strong");
+  label.textContent = "Turkce";
+  const textNode = document.createElement("span");
+  textNode.textContent = meaning;
+  hoverState.tooltip.appendChild(label);
+  hoverState.tooltip.appendChild(textNode);
+  hoverState.tooltip.style.display = "block";
+
+  const tooltipRect = hoverState.tooltip.getBoundingClientRect();
+  const left = Math.min(window.innerWidth - tooltipRect.width - 16, Math.max(12, rect.left));
+  const top = Math.max(12, rect.top - tooltipRect.height - 12);
+
+  hoverState.tooltip.style.left = `${left}px`;
+  hoverState.tooltip.style.top = `${top}px`;
+}
+
+function hideWordTooltip() {
+  if (hoverState.tooltip) {
+    hoverState.tooltip.style.display = "none";
+  }
+}
+
+async function translateHoveredWord(word) {
+  const normalizedWord = word.toLowerCase();
+
+  if (WORD_TRANSLATION_CACHE.has(normalizedWord)) {
+    return WORD_TRANSLATION_CACHE.get(normalizedWord);
+  }
+
+  const url = new URL("https://translate.googleapis.com/translate_a/single");
+  url.searchParams.set("client", "gtx");
+  url.searchParams.set("sl", "auto");
+  url.searchParams.set("tl", "tr");
+  url.searchParams.set("dt", "t");
+  url.searchParams.set("q", word);
+
+  const response = await fetch(url.toString());
+
+  if (!response.ok) {
+    throw new Error("Ceviri alinamadi.");
+  }
+
+  const data = await response.json();
+  const translatedWord = Array.isArray(data?.[0])
+    ? data[0].map((item) => item[0] || "").join("")
+    : "";
+
+  WORD_TRANSLATION_CACHE.set(normalizedWord, translatedWord);
+  return translatedWord;
+}
+
+function escapeHtml(value) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 function normalizeCaptionText(text) {
